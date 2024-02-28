@@ -1,0 +1,18 @@
+{
+    "data": {
+        "authentication_token": "burxaLRVfG6aw",
+        "estimated_data": true,
+        "database_name": "reports.db",
+        "database_type": "sqlite"
+    },
+    "name": "gen_config",
+    "version": null,
+    "sources": {
+        "1": {
+            "read_only": false,
+            "_priority": 10,
+            "path": "data/general_config.json"
+        }
+    },
+    "periodical_jobs": {}
+}

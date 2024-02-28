@@ -1,0 +1,17 @@
+.idea
+dist
+doc
+*.*
+
+!*.md
+!*.py
+!*.json
+!*.txt
+!*.cfg
+!*.toml
+!*.yml
+!*.conf
+!LICENSE
+!*.gitignore
+configurator/
+
