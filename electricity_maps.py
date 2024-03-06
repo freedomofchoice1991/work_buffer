@@ -3,9 +3,7 @@ from interface import ElectricityMapsInterface
 from energy_response_models import CarbonIntensityResponse, \
     PowerBreakdownResponse, \
     PowerConsumptionBreakdown, \
-    PowerProductionBreakdown, \
-    PowerImportBreakdown, \
-    PowerExportBreakdown
+    PowerProductionBreakdown
 from contextlib import contextmanager
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
@@ -95,16 +93,6 @@ class ElectricityMaps(ElectricityMapsInterface):
                     power_production_breakdown = PowerProductionBreakdown(source=source, value=value)
                     power_breakdown_response.power_production_breakdown.append(power_production_breakdown)
 
-                # Add power import breakdown
-                for source, value in self.json_response['powerImportBreakdown'].items():
-                    power_import_breakdown = PowerImportBreakdown(source=source, value=value)
-                    power_breakdown_response.power_import_breakdown.append(power_import_breakdown)
-
-                # Add power export breakdown
-                for source, value in self.json_response['powerExportBreakdown'].items():
-                    power_export_breakdown = PowerExportBreakdown(source=source, value=value)
-                    power_breakdown_response.power_export_breakdown.append(power_export_breakdown)
-
                 response_session.add(power_breakdown_response)
 
             if self.selected_time_endpoint == "history" and self.endpoint_type == "power-breakdown":
@@ -120,16 +108,6 @@ class ElectricityMaps(ElectricityMapsInterface):
                     for source, value in item['powerProductionBreakdown'].items():
                         power_production_breakdown = PowerProductionBreakdown(source=source, value=value)
                         power_breakdown_response.power_production_breakdown.append(power_production_breakdown)
-
-                    # Add power import breakdown
-                    for source, value in item['powerImportBreakdown'].items():
-                        power_import_breakdown = PowerImportBreakdown(source=source, value=value)
-                        power_breakdown_response.power_import_breakdown.append(power_import_breakdown)
-
-                    # Add power export breakdown
-                    for source, value in item['powerExportBreakdown'].items():
-                        power_export_breakdown = PowerExportBreakdown(source=source, value=value)
-                        power_breakdown_response.power_export_breakdown.append(power_export_breakdown)
 
                     response_session.add(power_breakdown_response)
 
