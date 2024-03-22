@@ -1,106 +1,223 @@
 import time
 import requests
 from pathlib import Path
+from contextlib import contextmanager
 from configurator.src.configurator import Configurator
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
 from energy_response_models import Base
-from energy_response_models import CarbonIntensityResponse, \
-    PowerBreakdownResponse, \
-    PowerProductionBreakdown, \
-    PowerConsumptionBreakdown, \
-    PowerImportBreakdown, \
-    PowerExportBreakdown
+from energy_response_models import Power, PowerPlant, Emission, Location, DataSource
+from datetime import datetime
 
 
 class APIDataCollectorDBSaver:
-    def __init__(self, session, path_url):
-        self.session = session
+    def __init__(self):
         self.api_base_url = "https://api.electricitymap.org"
-        self.path_url = path_url
 
-    def data_collector(self):
-        # Make API request to fetch data
-        api_response = requests.get(self.api_base_url + self.path_url)
-        parsed_json_response = api_response.json()
+    @contextmanager
+    def session_scope(self):
+        general_configurator_path = Path("data/general_config.json")
+        general_configurator = Configurator.from_file(str(general_configurator_path))
+        # ---------SQLite connection string---------
+        # database_connection_string = f'{general_configurator.get_parameter("database_type")}:///' \
+        #                              f'{general_configurator.get_parameter("database_name")}'
+        # ------PostgreSQL connection string-------
+        from sqlalchemy import URL
 
+        url_object = URL.create(drivername='postgresql+psycopg2',
+                                username='reza',
+                                password='E~1R^5@lGIX0',
+                                host='pg-develop2.eb.local',
+                                port=5432,
+                                database='co2signal')
+
+        database_connection_string = url_object
+        # -----database setting-----
+        connection_engine = create_engine(database_connection_string)
+        Session = sessionmaker(bind=connection_engine)
+        transaction_session = Session()
+        Base.metadata.create_all(connection_engine)
+        try:
+            yield transaction_session
+            transaction_session.commit()
+        except KeyboardInterrupt:
+            transaction_session.rollback()
+            raise ValueError('Interruption happened while connecting to DB.')
+        finally:
+            transaction_session.close()
+            connection_engine.dispose()
+
+    def data_collector(self, path_url):
+        parsed_json_response = None
+        try:
+            # Make API request to fetch data
+            api_response = requests.get(self.api_base_url + path_url)
+            parsed_json_response = api_response.json()
+        except requests.RequestException as error:
+            print('Error making request:', error)
         return parsed_json_response
 
+    def location_saver(self, location_data):
+        with self.session_scope() as session:
+            location = Location(country=location_data)
+            last_row = session.query(Location).order_by(desc(Location.id)).first()
+
+            if last_row is None or last_row.country != location_data:
+                session.add(location)
+
+    def datasource_saver(self, name):
+        with self.session_scope() as session:
+            data_source = DataSource(data_source_name=name, data_source_link=self.api_base_url)
+            last_row = session.query(DataSource).order_by(desc(DataSource.id)).first()
+
+            if last_row is None or last_row.data_source_name != name:
+                session.add(data_source)
+
     def carbon_intensity_response_saver(self, data: dict):
-        carbon_intensity_response = CarbonIntensityResponse(data)
+        with self.session_scope() as session:
+            power_plant = session.query(PowerPlant).first()
+            plant_id = power_plant.id
+            source = session.query(DataSource).first()
+            source_id = source.id
+            emission = Emission(emission_type='CO2',
+                                emission_amount=data['carbonIntensity'],
+                                calculation_method=data['emissionFactorType'],
+                                data_estimation=data['isEstimated'],
+                                date_time=datetime.strptime(data['datetime'], '%Y-%m-%dT%H:%M:%S.%fZ'),
+                                power_plant_id=plant_id,
+                                data_source_id=source_id)
+            last_row = session.query(Emission).order_by(desc(Emission.id)).first()
 
-        self.session.add(carbon_intensity_response)
-        self.session.commit()
-        self.session.close()
+            if last_row is None or last_row.date_time != emission.date_time:
+                session.add(emission)
 
-    def power_breakdown_response_saver(self, data: dict):
-        power_breakdown_response = PowerBreakdownResponse(data)
-        # Add power consumption breakdown
-        for source, value in data['powerConsumptionBreakdown'].items():
-            power_consumption_breakdown = PowerConsumptionBreakdown(source=source, value=value)
-            power_breakdown_response.power_consumption_breakdown.append(power_consumption_breakdown)
+    def power_plant_saver(self, location_id, data_source_id):
+        with self.session_scope() as session:
+            pp1 = PowerPlant(power_plant_name='Germany',
+                             power_plant_type='nuclear', power_status='Produced',
+                             renewable_status='renewable', carbon_source_rating='low',
+                             location_id=location_id, data_source_id=data_source_id)
+            pp2 = PowerPlant(power_plant_name='Germany', power_plant_type='geothermal', power_status='Produced',
+                             renewable_status='renewable', carbon_source_rating='low',
+                             location_id=location_id, data_source_id=data_source_id)
+            pp3 = PowerPlant(power_plant_name='Germany', power_plant_type='biomass', power_status='Produced',
+                             renewable_status='renewable', carbon_source_rating='high',
+                             location_id=location_id, data_source_id=data_source_id)
+            pp4 = PowerPlant(power_plant_name='Germany', power_plant_type='coal', power_status='Produced',
+                             renewable_status='conventional', carbon_source_rating='high',
+                             location_id=location_id, data_source_id=data_source_id)
+            pp5 = PowerPlant(power_plant_name='Germany', power_plant_type='wind', power_status='Produced',
+                             renewable_status='renewable', carbon_source_rating='low', location_id=location_id,
+                             data_source_id=data_source_id)
+            pp6 = PowerPlant(power_plant_name='Germany', power_plant_type='solar', power_status='Produced',
+                             renewable_status='renewable', carbon_source_rating='low', location_id=location_id,
+                             data_source_id=data_source_id)
+            pp7 = PowerPlant(power_plant_name='Germany', power_plant_type='hydro', power_status='Produced',
+                             renewable_status='renewable', carbon_source_rating='low', location_id=location_id,
+                             data_source_id=data_source_id)
+            pp8 = PowerPlant(power_plant_name='Germany', power_plant_type='gas', power_status='Produced',
+                             renewable_status='conventional', carbon_source_rating='high', location_id=location_id,
+                             data_source_id=data_source_id)
+            pp9 = PowerPlant(power_plant_name='Germany', power_plant_type='oil', power_status='Produced',
+                             renewable_status='conventional', carbon_source_rating='high', location_id=location_id,
+                             data_source_id=data_source_id)
+            pp10 = PowerPlant(power_plant_name='Germany', power_plant_type='unknown', power_status='Produced',
+                              renewable_status='unknown', carbon_source_rating='unknown', location_id=location_id,
+                              data_source_id=data_source_id)
+            pp11 = PowerPlant(power_plant_name='Germany', power_plant_type='hydro discharge', power_status='Produced',
+                              renewable_status='renewable', carbon_source_rating='low', location_id=location_id,
+                              data_source_id=data_source_id)
+            pp12 = PowerPlant(power_plant_name='Germany', power_plant_type='battery discharge', power_status='Produced',
+                              renewable_status='renewable', carbon_source_rating='low', location_id=location_id,
+                              data_source_id=data_source_id)
 
-        # Add power production breakdown
-        for source, value in data['powerProductionBreakdown'].items():
-            power_production_breakdown = PowerProductionBreakdown(source=source, value=value)
-            power_breakdown_response.power_production_breakdown.append(power_production_breakdown)
+            pp13 = PowerPlant(power_plant_name='Germany', power_plant_type='nuclear', power_status='Consumed',
+                              renewable_status='renewable', carbon_source_rating='low', location_id=location_id,
+                              data_source_id=data_source_id)
+            pp14 = PowerPlant(power_plant_name='Germany', power_plant_type='geothermal', power_status='Consumed',
+                              renewable_status='renewable', carbon_source_rating='low', location_id=location_id,
+                              data_source_id=data_source_id)
+            pp15 = PowerPlant(power_plant_name='Germany', power_plant_type='biomass', power_status='Consumed',
+                              renewable_status='renewable', carbon_source_rating='high', location_id=location_id,
+                              data_source_id=data_source_id)
+            pp16 = PowerPlant(power_plant_name='Germany', power_plant_type='coal', power_status='Consumed',
+                              renewable_status='conventional', carbon_source_rating='high', location_id=location_id,
+                              data_source_id=data_source_id)
+            pp17 = PowerPlant(power_plant_name='Germany', power_plant_type='wind', power_status='Consumed',
+                              renewable_status='renewable', carbon_source_rating='low', location_id=location_id,
+                              data_source_id=data_source_id)
+            pp18 = PowerPlant(power_plant_name='Germany', power_plant_type='solar', power_status='Consumed',
+                              renewable_status='renewable', carbon_source_rating='low', location_id=location_id,
+                              data_source_id=data_source_id)
+            pp19 = PowerPlant(power_plant_name='Germany', power_plant_type='hydro', power_status='Consumed',
+                              renewable_status='renewable', carbon_source_rating='low', location_id=location_id,
+                              data_source_id=data_source_id)
+            pp20 = PowerPlant(power_plant_name='Germany', power_plant_type='gas', power_status='Consumed',
+                              renewable_status='conventional', carbon_source_rating='high', location_id=location_id,
+                              data_source_id=data_source_id)
+            pp21 = PowerPlant(power_plant_name='Germany', power_plant_type='oil', power_status='Consumed',
+                              renewable_status='conventional', carbon_source_rating='high', location_id=location_id,
+                              data_source_id=data_source_id)
+            pp22 = PowerPlant(power_plant_name='Germany', power_plant_type='unknown', power_status='Consumed',
+                              renewable_status='unknown', carbon_source_rating='unknown', location_id=location_id,
+                              data_source_id=data_source_id)
+            pp23 = PowerPlant(power_plant_name='Germany', power_plant_type='hydro discharge', power_status='Consumed',
+                              renewable_status='renewable', carbon_source_rating='low', location_id=location_id,
+                              data_source_id=data_source_id)
+            pp24 = PowerPlant(power_plant_name='Germany', power_plant_type='battery discharge', power_status='Consumed',
+                              renewable_status='renewable', carbon_source_rating='low', location_id=location_id,
+                              data_source_id=data_source_id)
+            virtual_power_plants = [pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8, pp9, pp10, pp11, pp12,
+                                    pp13, pp14, pp15, pp16, pp17, pp18, pp19, pp20, pp21, pp22, pp23, pp24]
+            first_row = session.query(PowerPlant).first()
+            if first_row is None:
+                session.add_all(virtual_power_plants)
 
-        # Add power import breakdown
-        for source, value in data['powerImportBreakdown'].items():
-            power_import_breakdown = PowerImportBreakdown(source=source, value=value)
-            power_breakdown_response.power_import_breakdown.append(power_import_breakdown)
+    def power_saver(self, data: dict):
+        with self.session_scope() as session:
+            last_row = session.query(Power).order_by(desc(Power.id)).first()
+            source = session.query(DataSource).first()
+            source_id = source.id
+            for source, value in data['powerConsumptionBreakdown'].items():
+                records = session.query(PowerPlant).filter(PowerPlant.power_status == 'Consumed').all()
+                for record in records:
+                    if record.power_plant_type == source:
+                        pp_id = record.id
+                consumed_power = Power(amount=value,
+                                       date_time=datetime.strptime(data['datetime'], '%Y-%m-%dT%H:%M:%S.%fZ'),
+                                       power_plant_id=pp_id,
+                                       data_source_id=source_id)
+                if last_row is None or last_row.date_time != consumed_power.date_time:
+                    session.add(consumed_power)
 
-        # Add power export breakdown
-        for source, value in data['powerExportBreakdown'].items():
-            power_export_breakdown = PowerExportBreakdown(source=source, value=value)
-            power_breakdown_response.power_export_breakdown.append(power_export_breakdown)
+            for source, value in data['powerProductionBreakdown'].items():
+                records = session.query(PowerPlant).filter(PowerPlant.power_status == 'Produced').all()
+                for record in records:
+                    if record.power_plant_type == source:
+                        pp_id = record.id
+                produced_power = Power(amount=value,
+                                       date_time=datetime.strptime(data['datetime'], '%Y-%m-%dT%H:%M:%S.%fZ'),
+                                       power_plant_id=pp_id,
+                                       data_source_id=source_id)
+                if last_row is None or last_row.date_time != produced_power.date_time:
+                    session.add(produced_power)
 
-        self.session.add(power_breakdown_response)
-        self.session.commit()
-        self.session.close()
+    def fetch_and_store_data(self):
+        self.location_saver(location_data='DE')
+        self.datasource_saver('Electricity Maps')
+        with self.session_scope() as session:
+            source = session.query(DataSource).first()
+            data_source_id = source.id
+            location = session.query(Location).first()
+            location_id = location.id
+            self.power_plant_saver(location_id, data_source_id)
 
+        while True:
+            carbon_intensity_data = self.data_collector('/v3/carbon-intensity/latest?zone=DE')
+            power_breakdown_data = self.data_collector('/v3/power-breakdown/latest?zone=DE')
 
-if __name__ == "__main__":
-    general_configurator_path = Path("data/general_config.json")
-    general_configurator = Configurator.from_file(str(general_configurator_path))
+            self.carbon_intensity_response_saver(carbon_intensity_data)
+            self.power_saver(power_breakdown_data)
 
-    # ---------SQLite connection string---------
-    # database_connection_string = f'{general_configurator.get_parameter("database_type")}:///' \
-    #                              f'{general_configurator.get_parameter("database_name")}'
-
-    # ------PostgreSQL connection string-------
-    from sqlalchemy import URL
-
-    url_object = URL.create(drivername='postgresql+psycopg2',
-                            username='reza',
-                            password='E~1R^5@lGIX0',
-                            host='pg-develop2.eb.local',
-                            port=5432,
-                            database='co2signal')
-
-    database_connection_string = url_object
-
-    # -----database setting-----
-    
-    engine = create_engine(database_connection_string, echo=True)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    # Create the table
-    Base.metadata.create_all(engine)
-
-    # Create instances
-    carbon_intensity_manager = APIDataCollectorDBSaver(session, '/v3/carbon-intensity/latest?zone=DE')
-    power_breakdown_manager = APIDataCollectorDBSaver(session, '/v3/power-breakdown/latest?zone=DE')
-
-    # Run indefinitely
-    while True:
-        # fetch data
-        carbon_intensity_data = carbon_intensity_manager.data_collector()
-        power_breakdown_data = power_breakdown_manager.data_collector()
-
-        # store data
-        carbon_intensity_manager.carbon_intensity_response_saver(carbon_intensity_data)
-        power_breakdown_manager.power_breakdown_response_saver(power_breakdown_data)
-
-        # Sleep for 1 hour (3600 seconds)
-        time.sleep(3600)
+            # Sleep for 1 hour (3600 seconds)
+            time.sleep(3600)
