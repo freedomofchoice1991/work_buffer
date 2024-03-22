@@ -11,7 +11,7 @@
         "1": {
             "read_only": false,
             "_priority": 10,
-            "path": "data/general_config.json"
+            "path": "data\\general_config.json"
         }
     },
     "periodical_jobs": {}

@@ -9,47 +9,62 @@ class Base (DeclarativeBase):
     pass
 
 
-class CarbonIntensityResponse(Base):
-    __tablename__ = 'carbon_intensity_response'
+class Power(Base):
+    __tablename__ = 'power'
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    zone: Mapped[str]
-    carbon_intensity: Mapped[Optional[int]]
+    amount: Mapped[Optional[float]]
+    # amount: Mapped[float]
     date_time: Mapped[datetime]
-
-    def __init__(self, data: dict, **kw):
-        super().__init__(**kw)
-        self.zone = data.get('zone')
-        self.carbon_intensity = data.get('carbonIntensity')
-        self.date_time = datetime.strptime(data.get('datetime'), '%Y-%m-%dT%H:%M:%S.%fZ') if data.get(
-            'datetime') else None
+    power_plant_id: Mapped[int] = mapped_column(ForeignKey('power_plant.id'))
+    data_source_id: Mapped[int] = mapped_column(ForeignKey('data_source.id'))
 
 
-class PowerBreakdownResponse(Base):
-    __tablename__ = 'power_breakdown_response'
+class PowerPlant(Base):
+    __tablename__ = 'power_plant'
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    zone: Mapped[str]
+    power_plant_name: Mapped[str]
+    power_plant_type: Mapped[str]
+    co2_emission_rate: Mapped[Optional[float]]
+    power_status: Mapped[str]  # Produced or consumed
+    renewable_status: Mapped[str]  # renewable or conventional
+    carbon_source_rating: Mapped[str]  # high carbon or low carbon source category
+    owner: Mapped[Optional[str]]
+    location_id: Mapped[int] = mapped_column((ForeignKey('location.id')))
+    emission_data = relationship("Emission", backref="power_plant")
+    data_source_id: Mapped[int] = mapped_column(ForeignKey('data_source.id'))
+
+
+class Emission(Base):
+    __tablename__ = 'emission_data'
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    emission_type: Mapped[str]
+    emission_amount: Mapped[float]
+    calculation_method: Mapped[Optional[str]]
+    data_estimation: Mapped[Optional[bool]]
     date_time: Mapped[datetime]
-    power_consumption_breakdown = relationship("PowerConsumptionBreakdown", backref="power_breakdown_response")
-    power_production_breakdown = relationship("PowerProductionBreakdown", backref="power_breakdown_response")
-
-    def __init__(self, data: dict, **kw):
-        super().__init__(**kw)
-        self.zone = data.get('zone')
-        self.date_time = datetime.strptime(data.get('datetime'), '%Y-%m-%dT%H:%M:%S.%fZ') if data.get(
-            'datetime') else None
+    power_plant_id: Mapped[int] = mapped_column(ForeignKey('power_plant.id'))
+    data_source_id: Mapped[int] = mapped_column(ForeignKey('data_source.id'))
 
 
-class PowerConsumptionBreakdown(Base):
-    __tablename__ = 'power_consumption_breakdown'
+class Location(Base):
+    __tablename__ = 'location'
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    power_breakdown_response_id: Mapped[int] = mapped_column(ForeignKey('power_breakdown_response.id'))
-    source: Mapped[str]
-    value: Mapped[Optional[int]]
+    latitude: Mapped[Optional[float]]
+    longitude: Mapped[Optional[float]]
+    region: Mapped[Optional[str]]
+    city: Mapped[Optional[str]]
+    street: Mapped[Optional[str]]
+    number: Mapped[Optional[int]]
+    country: Mapped[Optional[str]]
+    zip_code: Mapped[Optional[int]]
+    power_plant = relationship("PowerPlant", backref="location")
 
 
-class PowerProductionBreakdown(Base):
-    __tablename__ = 'power_production_breakdown'
+class DataSource(Base):
+    __tablename__ = 'data_source'
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    power_breakdown_response_id: Mapped[int] = mapped_column(ForeignKey('power_breakdown_response.id'))
-    source: Mapped[str]
-    value: Mapped[Optional[int]]
+    data_source_name: Mapped[str]
+    data_source_link: Mapped[str]
+    power = relationship("Power", backref='data_source')
+    power_plant = relationship("PowerPlant", backref='data_source')
+    emission_data = relationship("Emission", backref='data_source')
