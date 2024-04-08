@@ -5,7 +5,7 @@ from typing import Optional
 
 
 # declarative base class
-class Base (DeclarativeBase):
+class Base(DeclarativeBase):
     pass
 
 
@@ -17,6 +17,12 @@ class Power(Base):
     date_time: Mapped[datetime]
     power_plant_id: Mapped[int] = mapped_column(ForeignKey('power_plant.id'))
     data_source_id: Mapped[int] = mapped_column(ForeignKey('data_source.id'))
+
+    def __eq__(self, other):
+        is_the_same: bool = (self.date_time == other.date_time and
+                             self.amount == other.amount and
+                             self.power_plant_id == other.power_plant_id)
+        return is_the_same
 
 
 class PowerPlant(Base):
@@ -44,6 +50,12 @@ class Emission(Base):
     date_time: Mapped[datetime]
     power_plant_id: Mapped[int] = mapped_column(ForeignKey('power_plant.id'))
     data_source_id: Mapped[int] = mapped_column(ForeignKey('data_source.id'))
+
+    def __eq__(self, other):
+        is_the_same: bool = (self.date_time == other.date_time and
+                             self.emission_amount == other.emission_amount and
+                             self.data_estimation == other.data_estimation)
+        return is_the_same
 
 
 class Location(Base):
