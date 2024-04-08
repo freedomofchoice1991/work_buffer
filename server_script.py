@@ -8,6 +8,8 @@ from sqlalchemy.orm import sessionmaker
 from energy_response_models import Base
 from energy_response_models import Power, PowerPlant, Emission, Location, DataSource
 from datetime import datetime
+from datetime import timedelta
+from sqlalchemy import URL
 
 
 class APIDataCollectorDBSaver:
@@ -18,20 +20,25 @@ class APIDataCollectorDBSaver:
     def session_scope(self):
         general_configurator_path = Path("data/general_config.json")
         general_configurator = Configurator.from_file(str(general_configurator_path))
-        # ---------SQLite connection string---------
-        # database_connection_string = f'{general_configurator.get_parameter("database_type")}:///' \
-        #                              f'{general_configurator.get_parameter("database_name")}'
-        # ------PostgreSQL connection string-------
-        from sqlalchemy import URL
 
-        url_object = URL.create(drivername='postgresql+psycopg2',
-                                username='reza',
-                                password='E~1R^5@lGIX0',
-                                host='pg-develop2.eb.local',
-                                port=5432,
-                                database='co2signal')
+        # ------PostgreSQL connection string-------
+        url_object = URL.create(drivername=general_configurator.get_parameter("database_drivername"),
+                                username=general_configurator.get_parameter("database_username"),
+                                password=general_configurator.get_parameter("database_password"),
+                                host=general_configurator.get_parameter("database_host"),
+                                port=general_configurator.get_parameter("database_port"),
+                                database=general_configurator.get_parameter("database_name"))
 
         database_connection_string = url_object
+        # ------PostgreSQL TEST connection string-------
+        # url_object = URL.create(drivername='postgresql+psycopg2',
+        #                         username='postgres',
+        #                         password='adminpass',
+        #                         host='localhost',
+        #                         port=5432,
+        #                         database='co2signal_test')
+        #
+        # database_connection_string = url_object
         # -----database setting-----
         connection_engine = create_engine(database_connection_string)
         Session = sessionmaker(bind=connection_engine)
@@ -75,21 +82,44 @@ class APIDataCollectorDBSaver:
 
     def carbon_intensity_response_saver(self, data: dict):
         with self.session_scope() as session:
+            history_list = data['history']
             power_plant = session.query(PowerPlant).first()
             plant_id = power_plant.id
             source = session.query(DataSource).first()
             source_id = source.id
-            emission = Emission(emission_type='CO2',
-                                emission_amount=data['carbonIntensity'],
-                                calculation_method=data['emissionFactorType'],
-                                data_estimation=data['isEstimated'],
-                                date_time=datetime.strptime(data['datetime'], '%Y-%m-%dT%H:%M:%S.%fZ'),
-                                power_plant_id=plant_id,
-                                data_source_id=source_id)
             last_row = session.query(Emission).order_by(desc(Emission.id)).first()
+            most_recent_time = last_row.date_time if last_row else None
 
-            if last_row is None or last_row.date_time != emission.date_time:
-                session.add(emission)
+            # If there are no emissions yet, consider the most recent time as None
+            if most_recent_time:
+                start_time = most_recent_time - timedelta(hours=24)
+            else:
+                start_time = None
+
+            # If there are no emissions yet, there's no end time to consider
+            end_time = most_recent_time if most_recent_time else None
+
+            last_24_hours_rows = []
+            # If there are emissions in the last 24 hours, query them
+            if start_time and end_time:
+                last_24_hours_rows = session.query(Emission).filter(
+                    Emission.date_time.between(start_time, end_time)).all()
+
+            for item in history_list:
+                emission = Emission(emission_type='CO2',
+                                    emission_amount=item['carbonIntensity'],
+                                    calculation_method=item['emissionFactorType'],
+                                    data_estimation=item['isEstimated'],
+                                    date_time=datetime.strptime(item['datetime'], '%Y-%m-%dT%H:%M:%S.%fZ'),
+                                    power_plant_id=plant_id,
+                                    data_source_id=source_id)
+
+                for row in last_24_hours_rows:
+                    if emission == row:
+                        break
+                # This else is associated with for loop and executes only if the loop completes normally
+                else:
+                    session.add(emission)
 
     def power_plant_saver(self, location_id, data_source_id):
         with self.session_scope() as session:
@@ -175,32 +205,55 @@ class APIDataCollectorDBSaver:
 
     def power_saver(self, data: dict):
         with self.session_scope() as session:
-            last_row = session.query(Power).order_by(desc(Power.id)).first()
             source = session.query(DataSource).first()
             source_id = source.id
-            for source, value in data['powerConsumptionBreakdown'].items():
-                records = session.query(PowerPlant).filter(PowerPlant.power_status == 'Consumed').all()
-                for record in records:
-                    if record.power_plant_type == source:
-                        pp_id = record.id
-                consumed_power = Power(amount=value,
-                                       date_time=datetime.strptime(data['datetime'], '%Y-%m-%dT%H:%M:%S.%fZ'),
-                                       power_plant_id=pp_id,
-                                       data_source_id=source_id)
-                if last_row is None or last_row.date_time != consumed_power.date_time:
-                    session.add(consumed_power)
+            history_list = data['history']
+            last_row = session.query(Power).order_by(desc(Power.id)).first()
+            most_recent_time = last_row.date_time if last_row else None
 
-            for source, value in data['powerProductionBreakdown'].items():
-                records = session.query(PowerPlant).filter(PowerPlant.power_status == 'Produced').all()
-                for record in records:
-                    if record.power_plant_type == source:
-                        pp_id = record.id
-                produced_power = Power(amount=value,
-                                       date_time=datetime.strptime(data['datetime'], '%Y-%m-%dT%H:%M:%S.%fZ'),
-                                       power_plant_id=pp_id,
-                                       data_source_id=source_id)
-                if last_row is None or last_row.date_time != produced_power.date_time:
-                    session.add(produced_power)
+            # If there are no power entity yet, consider the most recent time as None
+            if most_recent_time:
+                start_time = most_recent_time - timedelta(hours=24)
+            else:
+                start_time = None
+
+            # If there are no power entity yet, there's no end time to consider
+            end_time = most_recent_time if most_recent_time else None
+
+            last_24_hours_rows = []
+            # If there are power entities in the last 24 hours, query them
+            if start_time and end_time:
+                last_24_hours_rows = session.query(Power).filter(
+                    Power.date_time.between(start_time, end_time)).all()
+
+            for item in history_list:
+                for source, value in item['powerConsumptionBreakdown'].items():
+                    records = session.query(PowerPlant).filter(PowerPlant.power_status == 'Consumed').all()
+                    for record in records:
+                        if record.power_plant_type == source:
+                            pp_id = record.id
+                    consumed_power = Power(amount=value,
+                                           date_time=datetime.strptime(item['datetime'], '%Y-%m-%dT%H:%M:%S.%fZ'),
+                                           power_plant_id=pp_id,
+                                           data_source_id=source_id)
+                    for row in last_24_hours_rows:
+                        if consumed_power == row:
+                            break
+                    else:
+                        session.add(consumed_power)
+
+                for source, value in item['powerProductionBreakdown'].items():
+                    records = session.query(PowerPlant).filter(PowerPlant.power_status == 'Produced').all()
+                    for record in records:
+                        if record.power_plant_type == source:
+                            pp_id = record.id
+                    produced_power = Power(amount=value,
+                                           date_time=datetime.strptime(item['datetime'], '%Y-%m-%dT%H:%M:%S.%fZ'),
+                                           power_plant_id=pp_id,
+                                           data_source_id=source_id)
+
+                    if row not in last_24_hours_rows:
+                        session.add(produced_power)
 
     def fetch_and_store_data(self):
         self.location_saver(location_data='DE')
@@ -213,8 +266,8 @@ class APIDataCollectorDBSaver:
             self.power_plant_saver(location_id, data_source_id)
 
         while True:
-            carbon_intensity_data = self.data_collector('/v3/carbon-intensity/latest?zone=DE')
-            power_breakdown_data = self.data_collector('/v3/power-breakdown/latest?zone=DE')
+            carbon_intensity_data = self.data_collector('/v3/carbon-intensity/history?zone=DE')
+            power_breakdown_data = self.data_collector('/v3/power-breakdown/history?zone=DE')
 
             self.carbon_intensity_response_saver(carbon_intensity_data)
             self.power_saver(power_breakdown_data)

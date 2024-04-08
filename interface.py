@@ -1,4 +1,6 @@
 import multiprocessing
+import time
+
 from server_script import APIDataCollectorDBSaver
 import logging
 

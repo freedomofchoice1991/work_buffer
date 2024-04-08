@@ -2,8 +2,12 @@
     "data": {
         "authentication_token": "burxaLRVfG6aw",
         "estimated_data": true,
-        "database_name": "reports.db",
-        "database_type": "sqlite"
+        "database_name": "co2signal",
+        "database_username": "reza",
+        "database_host": "pg-develop2.eb.local",
+        "database_port": 5432,
+        "database_drivername": "postgresql+psycopg2",
+        "database_password": "E~1R^5@lGIX0"
     },
     "name": "gen_config",
     "version": null,
