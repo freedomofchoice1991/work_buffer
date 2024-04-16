@@ -30,7 +30,6 @@ class PowerPlant(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     power_plant_name: Mapped[str]
     power_plant_type: Mapped[str]
-    co2_emission_rate: Mapped[Optional[float]]
     production_status: Mapped[Optional[bool]]  # Produced or consumed
     renewable_status: Mapped[Optional[bool]]  # renewable or conventional
     high_carbon_source_status: Mapped[Optional[bool]]  # high carbon or low carbon source category
