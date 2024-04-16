@@ -31,7 +31,7 @@ class PowerPlant(Base):
     power_plant_name: Mapped[str]
     power_plant_type: Mapped[str]
     production_status: Mapped[Optional[bool]]  # Produced or consumed
-    renewable_status: Mapped[Optional[bool]]  # renewable or conventional
+    renewable_energy_status: Mapped[Optional[bool]]  # renewable or conventional
     high_carbon_source_status: Mapped[Optional[bool]]  # high carbon or low carbon source category
     owner: Mapped[Optional[str]]
     location_id: Mapped[int] = mapped_column((ForeignKey('location.id')))
