@@ -203,7 +203,7 @@ class APIDataCollectorDBSaver:
             if first_row is None:
                 session.add_all(virtual_power_plants)
 
-        def power_saver(self, data: dict):
+    def power_saver(self, data: dict):
         with self.session_scope() as session:
             source = session.query(DataSource).first()
             source_id = source.id
