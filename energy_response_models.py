@@ -43,7 +43,7 @@ class Emission(Base):
     __tablename__ = 'emission_data'
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     emission_type: Mapped[str]
-    emission_amount: Mapped[float]
+    emission_amount: Mapped[Optional[float]]
     calculation_method: Mapped[Optional[str]]
     data_estimation: Mapped[Optional[bool]]
     date_time: Mapped[datetime]
