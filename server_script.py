@@ -238,7 +238,7 @@ class APIDataCollectorDBSaver:
             for country_code, country_info in location_data.items():
                 if country_code == 'DE':
                     continue
-                pp_name = country_info['zoneName']
+                pp_name = country_code    # unicode problem fixed
                 pp_type = 'Unknown'
                 pp_location = session.query(Location).filter(Location.country == country_code).first()
                 pp_location_id = pp_location.id
@@ -308,6 +308,7 @@ class APIDataCollectorDBSaver:
                 #  ---- Import Export section -----
                 existing_locations = session.query(Location).all()
                 existing_power_plants = session.query(PowerPlant).all()
+                destination_power_plant_id = None
                 for source, value in item['powerImportBreakdown'].items():
                     # find the location rows for both import_source and import_destination
                     for location in existing_locations:
