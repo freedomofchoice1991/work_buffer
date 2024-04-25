@@ -13,15 +13,18 @@ class Power(Base):
     __tablename__ = 'power'
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     amount: Mapped[Optional[float]]
-    # amount: Mapped[float]
     date_time: Mapped[datetime]
-    power_plant_id: Mapped[int] = mapped_column(ForeignKey('power_plant.id'))
+    source_power_plant_id: Mapped[int] = mapped_column(ForeignKey('power_plant.id'))
+    destination_power_plant_id: Mapped[int] = mapped_column(ForeignKey('power_plant.id'), nullable=True)
     data_source_id: Mapped[int] = mapped_column(ForeignKey('data_source.id'))
+
+    source_power_plant = relationship("PowerPlant", foreign_keys=[source_power_plant_id])
+    destination_power_plant = relationship("PowerPlant", foreign_keys=[destination_power_plant_id])
 
     def __eq__(self, other):
         is_the_same: bool = (self.date_time == other.date_time and
                              self.amount == other.amount and
-                             self.power_plant_id == other.power_plant_id)
+                             self.source_power_plant_id == other.source_power_plant_id)
         return is_the_same
 
 
