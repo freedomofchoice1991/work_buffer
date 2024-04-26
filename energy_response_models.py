@@ -31,7 +31,6 @@ class Power(Base):
 class PowerPlant(Base):
     __tablename__ = 'power_plant'
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    power_plant_name: Mapped[str]
     power_plant_type: Mapped[str]
     production_status: Mapped[Optional[bool]]  # Produced or consumed
     renewable_energy_status: Mapped[Optional[bool]]  # renewable or conventional
@@ -69,7 +68,8 @@ class Location(Base):
     city: Mapped[Optional[str]]
     street: Mapped[Optional[str]]
     number: Mapped[Optional[int]]
-    country: Mapped[Optional[str]]
+    country_code: Mapped[Optional[str]]
+    country_name: Mapped[Optional[str]]
     zip_code: Mapped[Optional[int]]
     power_plant = relationship("PowerPlant", backref="location")
 
