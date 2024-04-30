@@ -363,6 +363,7 @@ class APIDataCollectorDBSaver:
                         session.add(exported_power)
 
     def fetch_and_store_data(self):
+        WAITING_TIME = 1
         location_data = self.data_collector('/v3/zones')
         self.location_saver(location_data=location_data)
         self.datasource_saver('Electricity Maps')
@@ -372,11 +373,18 @@ class APIDataCollectorDBSaver:
             self.power_plant_saver(location_data, data_source_id)
 
         while True:
-            carbon_intensity_data = self.data_collector('/v3/carbon-intensity/history?zone=DE')
-            power_breakdown_data = self.data_collector('/v3/power-breakdown/history?zone=DE')
+            current_time = datetime.now()
 
-            self.carbon_intensity_response_saver(carbon_intensity_data)
-            self.power_saver(power_breakdown_data)
+            time_difference = current_time - last_data_fetch_time
 
-            # Sleep for 1 hour (3600 seconds)
-            time.sleep(3600)
+            if time_difference >= timedelta(hours=1):
+                carbon_intensity_data = self.data_collector('/v3/carbon-intensity/history?zone=DE')
+                power_breakdown_data = self.data_collector('/v3/power-breakdown/history?zone=DE')
+
+                self.carbon_intensity_response_saver(carbon_intensity_data)
+                self.power_saver(power_breakdown_data)
+
+                # Update the last data fetch time to the current time
+                last_data_fetch_time = current_time
+
+            time.sleep(WAITING_TIME)
