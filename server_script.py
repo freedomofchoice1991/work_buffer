@@ -374,6 +374,9 @@ class APIDataCollectorDBSaver:
 
         while True:
             current_time = datetime.now()
+            with self.session_scope() as session:
+                recent_emission_record = session.query(Emission).order_by(desc(Emission.id)).first()
+                last_data_fetch_time = recent_emission_record.date_time
 
             time_difference = current_time - last_data_fetch_time
 
@@ -383,8 +386,5 @@ class APIDataCollectorDBSaver:
 
                 self.carbon_intensity_response_saver(carbon_intensity_data)
                 self.power_saver(power_breakdown_data)
-
-                # Update the last data fetch time to the current time
-                last_data_fetch_time = current_time
 
             time.sleep(WAITING_TIME)
