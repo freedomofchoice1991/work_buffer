@@ -303,10 +303,14 @@ class APIDataCollectorDBSaver:
             time_difference = current_time - last_data_fetch_time
 
             if time_difference >= timedelta(hours=1):
-                carbon_intensity_data = self.data_collector('/v3/carbon-intensity/history?zone=DE')
+                carbon_intensity_data_life_cycle_emission_factor =\
+                    self.data_collector('/v3/carbon-intensity/history?zone=DE')
+                carbon_intensity_data_direct_emission_factor =\
+                    self.data_collector('/v3/carbon-intensity/history?zone=DE&emissionFactorType=direct')
                 power_breakdown_data = self.data_collector('/v3/power-breakdown/history?zone=DE')
 
-                self.carbon_intensity_response_saver(carbon_intensity_data)
+                self.carbon_intensity_response_saver(carbon_intensity_data_life_cycle_emission_factor)
+                self.carbon_intensity_response_saver(carbon_intensity_data_direct_emission_factor)
                 self.power_saver(power_breakdown_data)
 
             time.sleep(WAITING_TIME)
