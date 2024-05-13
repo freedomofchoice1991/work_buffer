@@ -21,6 +21,7 @@ class APIDataCollectorDBSaver:
         general_configurator_path = Path("data/general_config.json")
         general_configurator = Configurator.from_file(str(general_configurator_path))
 
+
         # ------PostgreSQL connection string-------
         url_object = URL.create(drivername=general_configurator.get_parameter("database_drivername"),
                                 username=general_configurator.get_parameter("database_username"),
@@ -138,105 +139,26 @@ class APIDataCollectorDBSaver:
         with self.session_scope() as session:
             Germany_location = session.query(Location).filter(Location.country_code == 'DE').first()
             Germany_location_id = Germany_location.id
+            data_source_id = data_source_id
 
-            pp1 = PowerPlant(power_plant_type='nuclear', production_status=True,
-                             renewable_energy_status=True, high_carbon_source_status=False,
-                             location_id=Germany_location_id, data_source_id=data_source_id)
-            pp2 = PowerPlant(power_plant_type='geothermal', production_status=True,
-                             renewable_energy_status=True, high_carbon_source_status=False,
-                             location_id=Germany_location_id, data_source_id=data_source_id)
-            pp3 = PowerPlant(power_plant_type='biomass', production_status=True,
-                             renewable_energy_status=True, high_carbon_source_status=True,
-                             location_id=Germany_location_id, data_source_id=data_source_id)
-            pp4 = PowerPlant(power_plant_type='coal', production_status=True,
-                             renewable_energy_status=False, high_carbon_source_status=True,
-                             location_id=Germany_location_id, data_source_id=data_source_id)
-            pp5 = PowerPlant(power_plant_type='wind', production_status=True,
-                             renewable_energy_status=True, high_carbon_source_status=False,
-                             location_id=Germany_location_id,
-                             data_source_id=data_source_id)
-            pp6 = PowerPlant(power_plant_type='solar', production_status=True,
-                             renewable_energy_status=True, high_carbon_source_status=False,
-                             location_id=Germany_location_id,
-                             data_source_id=data_source_id)
-            pp7 = PowerPlant(power_plant_type='hydro', production_status=True,
-                             renewable_energy_status=True, high_carbon_source_status=False,
-                             location_id=Germany_location_id,
-                             data_source_id=data_source_id)
-            pp8 = PowerPlant(power_plant_type='gas', production_status=True,
-                             renewable_energy_status=False, high_carbon_source_status=True,
-                             location_id=Germany_location_id,
-                             data_source_id=data_source_id)
-            pp9 = PowerPlant(power_plant_type='oil', production_status=True,
-                             renewable_energy_status=False, high_carbon_source_status=True,
-                             location_id=Germany_location_id,
-                             data_source_id=data_source_id)
-            pp10 = PowerPlant(power_plant_type='unknown', production_status=True,
-                              renewable_energy_status=None, high_carbon_source_status=None,
-                              location_id=Germany_location_id,
-                              data_source_id=data_source_id)
-            pp11 = PowerPlant(power_plant_type='hydro discharge', production_status=True,
-                              renewable_energy_status=True, high_carbon_source_status=False,
-                              location_id=Germany_location_id,
-                              data_source_id=data_source_id)
-            pp12 = PowerPlant(power_plant_type='battery discharge', production_status=True,
-                              renewable_energy_status=True, high_carbon_source_status=False,
-                              location_id=Germany_location_id,
-                              data_source_id=data_source_id)
+            power_plant_configurator_path = Path("data/power_plant_config.json")
+            power_plant_configurator = Configurator.from_file(str(power_plant_configurator_path))
+            virtual_power_plants_data = power_plant_configurator.get_parameter("virtual_power_plants_data")
+            virtual_power_plants = []
+            for plant_data in virtual_power_plants_data:
+                pp = PowerPlant(
+                    power_plant_type=plant_data["power_plant_type"],
+                    production_status=plant_data["production_status"],
+                    renewable_energy_status=plant_data["renewable_energy_status"],
+                    high_carbon_source_status=plant_data["high_carbon_source_status"],
+                    location_id=Germany_location_id,
+                    data_source_id=data_source_id
+                )
+                virtual_power_plants.append(pp)
 
-            pp13 = PowerPlant(power_plant_type='nuclear', production_status=False,
-                              renewable_energy_status=True, high_carbon_source_status=False,
-                              location_id=Germany_location_id,
-                              data_source_id=data_source_id)
-            pp14 = PowerPlant(power_plant_type='geothermal', production_status=False,
-                              renewable_energy_status=True, high_carbon_source_status=False,
-                              location_id=Germany_location_id,
-                              data_source_id=data_source_id)
-            pp15 = PowerPlant(power_plant_type='biomass', production_status=False,
-                              renewable_energy_status=True, high_carbon_source_status=True,
-                              location_id=Germany_location_id,
-                              data_source_id=data_source_id)
-            pp16 = PowerPlant(power_plant_type='coal', production_status=False,
-                              renewable_energy_status=False, high_carbon_source_status=True,
-                              location_id=Germany_location_id,
-                              data_source_id=data_source_id)
-            pp17 = PowerPlant(power_plant_type='wind', production_status=False,
-                              renewable_energy_status=True, high_carbon_source_status=False,
-                              location_id=Germany_location_id,
-                              data_source_id=data_source_id)
-            pp18 = PowerPlant(power_plant_type='solar', production_status=False,
-                              renewable_energy_status=True, high_carbon_source_status=False,
-                              location_id=Germany_location_id,
-                              data_source_id=data_source_id)
-            pp19 = PowerPlant(power_plant_type='hydro', production_status=False,
-                              renewable_energy_status=True, high_carbon_source_status=False,
-                              location_id=Germany_location_id,
-                              data_source_id=data_source_id)
-            pp20 = PowerPlant(power_plant_type='gas', production_status=False,
-                              renewable_energy_status=False, high_carbon_source_status=True,
-                              location_id=Germany_location_id,
-                              data_source_id=data_source_id)
-            pp21 = PowerPlant(power_plant_type='oil', production_status=False,
-                              renewable_energy_status=False, high_carbon_source_status=True,
-                              location_id=Germany_location_id,
-                              data_source_id=data_source_id)
-            pp22 = PowerPlant(power_plant_type='unknown', production_status=False,
-                              renewable_energy_status=None, high_carbon_source_status=None,
-                              location_id=Germany_location_id,
-                              data_source_id=data_source_id)
-            pp23 = PowerPlant(power_plant_type='hydro discharge', production_status=False,
-                              renewable_energy_status=True, high_carbon_source_status=False,
-                              location_id=Germany_location_id,
-                              data_source_id=data_source_id)
-            pp24 = PowerPlant(power_plant_type='battery discharge', production_status=False,
-                              renewable_energy_status=True, high_carbon_source_status=False,
-                              location_id=Germany_location_id,
-                              data_source_id=data_source_id)
-            virtual_power_plants = [pp1, pp2, pp3, pp4, pp5, pp6, pp7, pp8, pp9, pp10, pp11, pp12,
-                                    pp13, pp14, pp15, pp16, pp17, pp18, pp19, pp20, pp21, pp22, pp23, pp24]
-            first_row = session.query(PowerPlant).first()
-            # add virtual power_plants only once
-            if first_row is None:
+            number_of_existing_rows = session.query(PowerPlant).count()
+            # Add virtual power_plants only if the table is empty
+            if number_of_existing_rows == 0:
                 session.add_all(virtual_power_plants)
 
             real_power_plants = []
