@@ -73,25 +73,14 @@ class APIDataCollectorDBSaver:
                     if key == record.country_code:
                         record.country_name = value.get('zoneName')
 
-            # # Save all new locations from API
-            # all_locations = []
-            # for key, value in location_data.items():
-            #     if key == 'DE':
-            #         continue
-            #     current_location = Location(country_code=key, country_name=value['zoneName'])
-            #     all_locations.append(current_location)
-            #
-            # location_table_count = session.query(Location).count()
-            # # Happens only once and not going to create replicate data
-            # if location_table_count == 1:
-            #     session.add_all(all_locations)
 
     def datasource_saver(self, name):
         with self.session_scope() as session:
             data_source = DataSource(data_source_name=name, data_source_link=self.api_base_url)
-            last_row = session.query(DataSource).order_by(desc(DataSource.id)).first()
-
-            if last_row is None or last_row.data_source_name != name:
+            data_source_names_records = session.query(DataSource.data_source_name).all()
+            data_sources_names = [row[0] for row in data_source_names_records]  # extract names as list
+            # if the table is empty or this is a new name then insert as new data source
+            if len(data_source_names_records) == 0 or name not in data_sources_names:
                 session.add(data_source)
 
     def carbon_intensity_response_saver(self, data: dict):
