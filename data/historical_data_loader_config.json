@@ -1,0 +1,18 @@
+{
+    "data": {
+        "data_source_name": "Electricity Maps Historical Data",
+        "historical_2021_data_path": "data/DE_2021_hourly.csv",
+        "historical_2022_data_path": "data/DE_2022_hourly.csv",
+        "historical_2023_data_path": "data/DE_2023_hourly.csv"
+    },
+    "name": "historical_data_loader_config",
+    "version": null,
+    "sources": {
+        "1": {
+            "read_only": false,
+            "_priority": 10,
+            "path": "data\\historical_data_loader_config.json"
+        }
+    },
+    "periodical_jobs": {}
+}
