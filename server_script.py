@@ -73,7 +73,6 @@ class APIDataCollectorDBSaver:
                     if key == record.country_code:
                         record.country_name = value.get('zoneName')
 
-
     def datasource_saver(self, name):
         with self.session_scope() as session:
             data_source = DataSource(data_source_name=name, data_source_link=self.api_base_url)

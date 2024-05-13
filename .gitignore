@@ -14,5 +14,6 @@ doc
 !LICENSE
 !*.gitignore
 !*.ini
+!*.csv
 configurator/
 
