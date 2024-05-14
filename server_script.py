@@ -23,23 +23,23 @@ class APIDataCollectorDBSaver:
 
 
         # ------PostgreSQL connection string-------
-        url_object = URL.create(drivername=general_configurator.get_parameter("database_drivername"),
-                                username=general_configurator.get_parameter("database_username"),
-                                password=general_configurator.get_parameter("database_password"),
-                                host=general_configurator.get_parameter("database_host"),
-                                port=general_configurator.get_parameter("database_port"),
-                                database=general_configurator.get_parameter("database_name"))
+#        url_object = URL.create(drivername=general_configurator.get_parameter("database_drivername"),
+#                                username=general_configurator.get_parameter("database_username"),
+#                                password=general_configurator.get_parameter("database_password"),
+#                                host=general_configurator.get_parameter("database_host"),
+#                                port=general_configurator.get_parameter("database_port"),
+#                                database=general_configurator.get_parameter("database_name"))
 
-        database_connection_string = url_object
+#        database_connection_string = url_object
         # ------PostgreSQL TEST connection string-------
-        # url_object = URL.create(drivername='postgresql+psycopg2',
-        #                         username='postgres',
-        #                         password='adminpass',
-        #                         host='localhost',
-        #                         port=5432,
-        #                         database='co2signal_test')
-        #
-        # database_connection_string = url_object
+         url_object = URL.create(drivername='postgresql+psycopg2',
+                                 username='postgres',
+                                 password='adminpass',
+                                 host='localhost',
+                                 port=5432,
+                                 database='co2_ubuntu_practice')
+        
+         database_connection_string = url_object
         # -----database setting-----
         connection_engine = create_engine(database_connection_string)
         Session = sessionmaker(bind=connection_engine)
