@@ -1,0 +1,36 @@
+system_calls.py - 82 - 2024-05-31 10:47:37,872 - INFO - Process 6437 has received SIGTRAP signal
+system_calls.py - 83 - 2024-05-31 10:47:37,873 - INFO - This was a trap for debugging purpose by programmer. Ensure no debugger is unintentionally attached to your process. Examine the code around the breakpoint or trap instruction to understand why it was triggered.
+
+system_calls.py - 138 - 2024-05-31 10:47:37,878 - INFO - Process 6436 has received SIGCHLD signal
+system_calls.py - 139 - 2024-05-31 10:47:37,879 - INFO - Signal indicates that a child process to this process was terminated.
+
+system_calls.py - 82 - 2024-05-31 10:47:45,063 - INFO - Process 6438 has received SIGTRAP signal
+system_calls.py - 83 - 2024-05-31 10:47:45,064 - INFO - This was a trap for debugging purpose by programmer. Ensure no debugger is unintentionally attached to your process. Examine the code around the breakpoint or trap instruction to understand why it was triggered.
+
+system_calls.py - 138 - 2024-05-31 10:47:45,070 - INFO - Process 6436 has received SIGCHLD signal
+system_calls.py - 139 - 2024-05-31 10:47:45,070 - INFO - Signal indicates that a child process to this process was terminated.
+
+system_calls.py - 82 - 2024-05-31 10:49:24,487 - INFO - Process 6476 has received SIGTRAP signal
+system_calls.py - 83 - 2024-05-31 10:49:24,488 - INFO - This was a trap for debugging purpose by programmer. Ensure no debugger is unintentionally attached to your process. Examine the code around the breakpoint or trap instruction to understand why it was triggered.
+
+system_calls.py - 138 - 2024-05-31 10:49:24,497 - INFO - Process 6470 has received SIGCHLD signal
+system_calls.py - 139 - 2024-05-31 10:49:24,499 - INFO - Signal indicates that a child process to this process was terminated.
+
+system_calls.py - 82 - 2024-05-31 10:49:36,081 - INFO - Process 6477 has received SIGTRAP signal
+system_calls.py - 83 - 2024-05-31 10:49:36,082 - INFO - This was a trap for debugging purpose by programmer. Ensure no debugger is unintentionally attached to your process. Examine the code around the breakpoint or trap instruction to understand why it was triggered.
+
+system_calls.py - 138 - 2024-05-31 10:49:36,087 - INFO - Process 6470 has received SIGCHLD signal
+system_calls.py - 139 - 2024-05-31 10:49:36,088 - INFO - Signal indicates that a child process to this process was terminated.
+
+system_calls.py - 103 - 2024-05-31 14:43:28,094 - INFO - Process 6896 has received SIGFPE signal
+system_calls.py - 104 - 2024-05-31 14:43:28,096 - INFO - Check for Underflow, Overflow, Division by Zero or Invalid operation in the code.
+
+system_calls.py - 138 - 2024-05-31 14:43:28,104 - INFO - Process 6895 has received SIGCHLD signal
+system_calls.py - 139 - 2024-05-31 14:43:28,106 - INFO - Signal indicates that a child process to this process was terminated.
+
+system_calls.py - 103 - 2024-05-31 14:43:40,833 - INFO - Process 6897 has received SIGFPE signal
+system_calls.py - 104 - 2024-05-31 14:43:40,835 - INFO - Check for Underflow, Overflow, Division by Zero or Invalid operation in the code.
+
+system_calls.py - 138 - 2024-05-31 14:43:40,839 - INFO - Process 6895 has received SIGCHLD signal
+system_calls.py - 139 - 2024-05-31 14:43:40,840 - INFO - Signal indicates that a child process to this process was terminated.
+
