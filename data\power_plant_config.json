@@ -1,0 +1,161 @@
+{
+    "data": {
+        "power_plant_name": "Germany",
+        "virtual_power_plants_data": [
+            {
+                "power_plant_type": "nuclear",
+                "production_status": true,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": false
+            },
+            {
+                "power_plant_type": "geothermal",
+                "production_status": true,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": false
+            },
+            {
+                "power_plant_type": "biomass",
+                "production_status": true,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": true
+            },
+            {
+                "power_plant_type": "coal",
+                "production_status": true,
+                "renewable_energy_status": false,
+                "high_carbon_source_status": true
+            },
+            {
+                "power_plant_type": "wind",
+                "production_status": true,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": false
+            },
+            {
+                "power_plant_type": "solar",
+                "production_status": true,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": false
+            },
+            {
+                "power_plant_type": "hydro",
+                "production_status": true,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": false
+            },
+            {
+                "power_plant_type": "gas",
+                "production_status": true,
+                "renewable_energy_status": false,
+                "high_carbon_source_status": true
+            },
+            {
+                "power_plant_type": "oil",
+                "production_status": true,
+                "renewable_energy_status": false,
+                "high_carbon_source_status": true
+            },
+            {
+                "power_plant_type": "unknown",
+                "production_status": true,
+                "renewable_energy_status": null,
+                "high_carbon_source_status": null
+            },
+            {
+                "power_plant_type": "hydro discharge",
+                "production_status": true,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": false
+            },
+            {
+                "power_plant_type": "battery discharge",
+                "production_status": true,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": false
+            },
+            {
+                "power_plant_type": "nuclear",
+                "production_status": false,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": false
+            },
+            {
+                "power_plant_type": "geothermal",
+                "production_status": false,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": false
+            },
+            {
+                "power_plant_type": "biomass",
+                "production_status": false,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": true
+            },
+            {
+                "power_plant_type": "coal",
+                "production_status": false,
+                "renewable_energy_status": false,
+                "high_carbon_source_status": true
+            },
+            {
+                "power_plant_type": "wind",
+                "production_status": false,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": false
+            },
+            {
+                "power_plant_type": "solar",
+                "production_status": false,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": false
+            },
+            {
+                "power_plant_type": "hydro",
+                "production_status": false,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": false
+            },
+            {
+                "power_plant_type": "gas",
+                "production_status": false,
+                "renewable_energy_status": false,
+                "high_carbon_source_status": true
+            },
+            {
+                "power_plant_type": "oil",
+                "production_status": false,
+                "renewable_energy_status": false,
+                "high_carbon_source_status": true
+            },
+            {
+                "power_plant_type": "unknown",
+                "production_status": false,
+                "renewable_energy_status": null,
+                "high_carbon_source_status": null
+            },
+            {
+                "power_plant_type": "hydro discharge",
+                "production_status": false,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": false
+            },
+            {
+                "power_plant_type": "battery discharge",
+                "production_status": false,
+                "renewable_energy_status": true,
+                "high_carbon_source_status": false
+            }
+        ]
+    },
+    "name": "power_plant_config",
+    "version": null,
+    "sources": {
+        "1": {
+            "read_only": false,
+            "_priority": 10,
+            "path": "data\\power_plant_config.json"
+        }
+    },
+    "periodical_jobs": {}
+}

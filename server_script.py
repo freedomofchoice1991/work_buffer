@@ -1,20 +1,25 @@
+import signal
+import logging
+import os
 import time
 import requests
 from pathlib import Path
 from contextlib import contextmanager
 from configurator.src.configurator import Configurator
-from sqlalchemy import create_engine, desc
+from sqlalchemy import create_engine, desc, text
 from sqlalchemy.orm import sessionmaker
 from energy_response_models import Base
 from energy_response_models import Power, PowerPlant, Emission, Location, DataSource
 from datetime import datetime
 from datetime import timedelta
 from sqlalchemy import URL
+from system_calls import SystemCallsManager
 
 
 class APIDataCollectorDBSaver:
     def __init__(self):
         self.api_base_url = "https://api.electricitymap.org"
+    
 
     @contextmanager
     def session_scope(self):
@@ -22,24 +27,14 @@ class APIDataCollectorDBSaver:
         general_configurator = Configurator.from_file(str(general_configurator_path))
 
 
-        # ------PostgreSQL connection string-------
-#        url_object = URL.create(drivername=general_configurator.get_parameter("database_drivername"),
-#                                username=general_configurator.get_parameter("database_username"),
-#                                password=general_configurator.get_parameter("database_password"),
-#                                host=general_configurator.get_parameter("database_host"),
-#                                port=general_configurator.get_parameter("database_port"),
-#                                database=general_configurator.get_parameter("database_name"))
+        url_object = URL.create(drivername='postgresql+psycopg2',
+                                username='reza',
+                                password='E~1R^5@lGIX0',
+                                host='pg-develop2.eb.local',
+                                port=5432,
+                                database='co2signal_test')
 
-#        database_connection_string = url_object
-        # ------PostgreSQL TEST connection string-------
-         url_object = URL.create(drivername='postgresql+psycopg2',
-                                 username='postgres',
-                                 password='adminpass',
-                                 host='localhost',
-                                 port=5432,
-                                 database='co2_ubuntu_practice')
-        
-         database_connection_string = url_object
+        database_connection_string = url_object
         # -----database setting-----
         connection_engine = create_engine(database_connection_string)
         Session = sessionmaker(bind=connection_engine)
@@ -273,6 +268,9 @@ class APIDataCollectorDBSaver:
                         session.add(exported_power)
 
     def fetch_and_store_data(self):
+        child_system_catcher = SystemCallsManager(os.getpid())
+        message = f"Child process: {os.getpid()} is running...Parent of this child:{os.getppid()}"
+        logging.info(message)
         WAITING_TIME = 1
         location_data = self.data_collector('/v3/zones')
         self.location_saver(location_data=location_data)
