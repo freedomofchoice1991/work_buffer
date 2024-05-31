@@ -1,0 +1,33 @@
+interface.py - 39 - 2024-05-31 13:37:01,213 - INFO - Program is started in a shell process with id: 14494
+interface.py - 17 - 2024-05-31 13:37:01,213 - INFO - Parent process {os.getpid()} has been created...
+
+server_script.py - 273 - 2024-05-31 13:37:01,223 - INFO - Child process: 14862 is running...Parent of this child:14860
+system_calls.py - 117 - 2024-05-31 13:37:50,652 - INFO - Termination signal will end this process after the proper cleanup.
+
+system_calls.py - 53 - 2024-05-31 13:37:50,652 - INFO - Process 14862 has received SIGTERM signal.
+
+system_calls.py - 121 - 2024-05-31 13:37:50,672 - INFO - Process 14860 has received SIGCHLD signal
+system_calls.py - 122 - 2024-05-31 13:37:50,673 - INFO - Signal indicates that a child process to this process was terminated.
+
+interface.py - 39 - 2024-05-31 13:38:23,108 - INFO - Program is started in a shell process with id: 14494
+interface.py - 17 - 2024-05-31 13:38:23,109 - INFO - Parent process 14933 has been created...
+
+server_script.py - 273 - 2024-05-31 13:38:23,117 - INFO - Child process: 14935 is running...Parent of this child:14933
+system_calls.py - 117 - 2024-05-31 13:40:49,575 - INFO - Termination signal will end this process after the proper cleanup.
+
+system_calls.py - 53 - 2024-05-31 13:40:49,575 - INFO - Process 14933 has received SIGTERM signal.
+
+interface.py - 39 - 2024-05-31 13:52:33,089 - INFO - Program is started in a shell process with id: 14494
+interface.py - 17 - 2024-05-31 13:52:33,090 - INFO - Parent process 15229 has been created...
+
+server_script.py - 273 - 2024-05-31 13:52:33,094 - INFO - Child process: 15230 is running...Parent of this child:15229
+system_calls.py - 164 - 2024-05-31 13:53:36,239 - INFO - Process 15229 has received SIGWINCH signal
+system_calls.py - 165 - 2024-05-31 13:53:36,240 - INFO - The window size of the terminal has changed.
+
+system_calls.py - 164 - 2024-05-31 13:53:36,240 - INFO - Process 15230 has received SIGWINCH signal
+system_calls.py - 165 - 2024-05-31 13:53:36,240 - INFO - The window size of the terminal has changed.
+
+system_calls.py - 117 - 2024-05-31 13:53:57,127 - INFO - Termination signal will end this process after the proper cleanup.
+
+system_calls.py - 53 - 2024-05-31 13:53:57,128 - INFO - Process 15229 has received SIGTERM signal.
+
